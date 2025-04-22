@@ -16,7 +16,7 @@ spec:
       # If not set, the name of the chart will be used instead.
       releaseName: minio-operator
       valueFiles:
-        - values-operator.yaml
+      - values-operator.yaml
       ignoreMissingValueFiles: true  
       version: v3
   destination:
