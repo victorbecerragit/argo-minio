@@ -8,6 +8,21 @@ operator:
     pullPolicy: IfNotPresent
   #SecurityContext:
   # You may need to modify these values to meet your cluster's security and access settings.
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
   #Resources:
   resources:
     requests:
@@ -15,6 +30,6 @@ operator:
       memory: 512Mi
       ephemeral-storage: 500Mi
     limits:
-      cpu: 1000m
-      memory: 1024Mi
-      ephemeral-storage: 1024Mi
+      cpu: 1
+      memory: 1Gi
+      ephemeral-storage: 1Gi
