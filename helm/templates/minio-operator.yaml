@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-operator
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: production
+  source:
+    chart: operator # minio-operator
+    repoURL:  https://operator.min.io/ #https://github.com/vfarcic/devops-paradox.git
+    targetRevision: 7.1.0
+    helm:
+      releaseName: minio-operator
+      version: v3
+  destination:
+    namespace: minio
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
