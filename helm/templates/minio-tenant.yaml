@@ -1,18 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-operator
+  name: minio-tenant
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: production
   source:
-    chart: operator # minio-operator
+    chart: tenant # minio-tenant
     repoURL:  https://operator.min.io/
     targetRevision: 7.1.0
     helm:
-      releaseName: minio-operator
+      releaseName: minio-tenant
       version: v3
   destination:
     namespace: minio
