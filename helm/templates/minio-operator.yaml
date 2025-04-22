@@ -12,7 +12,12 @@ spec:
     repoURL:  https://operator.min.io/
     targetRevision: 7.1.0
     helm:
+      # The name of the release. This is used to name the resources created by the chart.
+      # If not set, the name of the chart will be used instead.
       releaseName: minio-operator
+      valueFiles:
+        - values-operator.yaml
+      ignoreMissingValueFiles: true  
       version: v3
   destination:
     namespace: minio
