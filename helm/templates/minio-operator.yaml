@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: minio-operator
   namespace: argocd
+  # Ensures resources are cleaned up before deletion
+  # This finalizer is added by Argo CD to ensure that resources are cleaned up before the application is deleted.
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -15,13 +17,13 @@ spec:
       # The name of the release. This is used to name the resources created by the chart.
       # If not set, the name of the chart will be used instead.
       releaseName: minio-operator
-      values: |
-          replicaCount: 3
-          resources:
-            requests:
-              cpu: 400m
-              memory: 512Mi
-              ephemeral-storage: 500Mi
+      parameters:
+        - name: operator.replicaCount
+          value: '3'
+        - name: operator.resources.requests.cpu
+          value: 400m
+        - name: operator.resources.requests.memory
+          value: 512Mi      
       #valueFiles:
       #- values-operator.yaml
       ignoreMissingValueFiles: true  
