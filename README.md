@@ -24,4 +24,8 @@ helm
     minio-operator.yaml
     minio-tenant.yaml
 
+# ArgoCD Application template reference
+
+https://github.com/victorbecerragit/argocd-demo/blob/master/application-template.yaml
+
 
