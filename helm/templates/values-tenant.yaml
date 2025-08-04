@@ -7,16 +7,12 @@ tenant:
   env:
     - name: MINIO_PROMETHEUS_AUTH_TYPE
       value: "public"
-  configSecret:
-    name: tenant-alpha-env-config
-    accessKey: minio
-    secretKey: minio123
   pools:
-    - servers: 4                   # Multi-node: 4 pods
+    - servers: 1                   # Multi-node: 4 pods
       name: pool-alpha
       volumesPerServer: 1          # Multi-drive: 4 drives per pod/node
       size: 2Gi                    # Size per volume = 4 x 2 = 8Gi
-      storageClassName: directpv-min-io   # storageClassName: directpv-min-io
+      storageClassName: standard   # storageClassName: directpv-min-io
       tolerations:
         - key: minio-directpv
           value: storage
@@ -34,11 +30,11 @@ tenant:
               topologyKey: "kubernetes.io/hostname"
       resources:
         requests:
-          cpu: 1
-          memory: 2Gi
+          cpu: 200m
+          memory: 512Mi
         limits:
-          cpu: 2
-          memory: 4Gi
+          cpu: 1
+          memory: 1Gi
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

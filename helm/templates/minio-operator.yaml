@@ -19,7 +19,7 @@ spec:
       releaseName: minio-operator
       parameters:
         - name: operator.replicaCount
-          value: '3'
+          value: '1'
         - name: operator.resources.requests.cpu
           value: 400m
         - name: operator.resources.requests.memory
