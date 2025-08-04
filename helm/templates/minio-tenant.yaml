@@ -17,7 +17,7 @@ spec:
       releaseName: minio-tenant
       version: v3
       valuesFiles:
-        - values-tenant.yaml
+        - ../values-tenant.yaml
       ignoreMissingValueFiles: true
   destination:
     namespace: minio-tenant
