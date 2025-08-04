@@ -2,7 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: minio-operator
-  namespace: argocd
+  annotations: 
+    argocd.argoproj.io/sync-wave: "0"
   # Ensures resources are cleaned up before deletion
   # This finalizer is added by Argo CD to ensure that resources are cleaned up before the application is deleted.
   finalizers:
