@@ -8,7 +8,7 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: production
+  project: system
   source:
     chart: tenant # minio-tenant
     repoURL:  https://operator.min.io/
@@ -16,8 +16,11 @@ spec:
     helm:
       releaseName: minio-tenant
       version: v3
+      valuesFiles:
+        - values-tenant.yaml
+      ignoreMissingValueFiles: true
   destination:
-    namespace: minio
+    namespace: minio-tenant
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:

@@ -8,7 +8,7 @@ metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
-  project: production
+  project: system
   source:
     chart: operator # minio-operator
     repoURL:  https://operator.min.io/
@@ -29,7 +29,7 @@ spec:
       ignoreMissingValueFiles: true  
       version: v3
   destination:
-    namespace: minio
+    namespace: minio-operator
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
