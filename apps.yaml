@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: production
+  project: system
   source:
     repoURL: https://github.com/victorbecerragit/argo-minio.git
     targetRevision: HEAD
