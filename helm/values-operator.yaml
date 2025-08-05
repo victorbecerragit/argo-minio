@@ -1,0 +1,60 @@
+---
+operator:
+  env:
+    - name: OPERATOR_STS_ENABLED
+      value: "on"
+    - name: WATCHED_NAMESPACE
+      value: "tenant-alpha,tenant-beta"
+  serviceAccountAnnotations: []
+  additionalLabels: {}
+  image:
+    repository: quay.io/minio/operator
+    tag: v7.1.0
+    pullPolicy: IfNotPresent
+  sidecarImage: {}
+  imagePullSecrets: [ ]
+  runtimeClassName: ~
+  initContainers: [ ]
+  replicaCount: 2
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    seccompProfile:
+      type: RuntimeDefault
+  volumes: [ ]
+  volumeMounts: [ ]
+  nodeSelector: { }
+  priorityClassName: ""
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: name
+                operator: In
+                values:
+                  - minio-operator
+          topologyKey: kubernetes.io/hostname
+  tolerations:
+    - key: minio-directpv
+      value: storage
+      effect: NoSchedule
+  topologySpreadConstraints: [ ]
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi

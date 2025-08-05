@@ -1,31 +1,30 @@
 # argo-minio
 
-Test mono repo to deploy minio Operator and Tenant with ArgoCD
+Test mono repo to deploy minio Operator and Tenant with ArgoCD and directpv
 
 
-# Default values that could overwritte.
+# The folder scripts contains:
 
-helm show values minio/operator --version 7.1.0 > minio-operator-defaults.yaml
+ - bootstrap-directpv.sh (This script install and configure directpv with the dedicated nodes for minio operations)
 
-helm show values minio/tenant --version 7.1.0 > minio-tenant-defaults.yaml
+ - bootstrap-argo.sh (This is just a kubectl apply of argo project "system" from where the "app" minio will deploy the helms charts from folder /helm)
 
-
-# Sample main root argocd app to handle helm charts (similar to an umbrella chart), will check everything behing path /helm.
+# argocd/minio/ > root argocd app to handle helm charts (similar to an umbrella chart), will check everything behing path /helm.
 
 - apps.yaml
 
 
-# Minio operator and tenant helm chart definitions within path /helm
+# Minio operator and tenants helm chart definitions are behind folder /helm
 
 
 helm
   Chart.yaml
   templates
     minio-operator.yaml
-    minio-tenant.yaml
+    tenant-one.yaml
+    tenant-two.yaml
 
-# ArgoCD Application template reference
 
-https://github.com/victorbecerragit/argocd-demo/blob/master/application-template.yaml
+
 
 

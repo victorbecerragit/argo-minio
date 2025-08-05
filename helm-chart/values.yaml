@@ -1,0 +1,13 @@
+operator:
+  enabled: true
+  replicaCount: 1
+
+tenants:
+  - name: tenant-one
+    namespace: tenant-one
+    replicas: 4
+    volumesPerNode: 4
+  - name: tenant-two
+    namespace: tenant-two
+    replicas: 2
+    volumesPerNode: 2

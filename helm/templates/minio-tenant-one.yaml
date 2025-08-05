@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-tenant
+  name: tenant-one
   namespace: argocd
   annotations: 
     argocd.argoproj.io/sync-wave: "1"
@@ -12,17 +12,17 @@ metadata:
 spec:
   project: system
   source:
-    chart: tenant # minio-tenant
+    chart: tenant 
     repoURL:  https://operator.min.io/
     targetRevision: 7.1.0
     helm:
       releaseName: minio-tenant
       version: v3
       valuesFiles:
-        - ../values-tenant.yaml
+        - ../values-tenant-one.yaml
       ignoreMissingValueFiles: true
   destination:
-    namespace: minio-tenant
+    namespace: tenant-one
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:

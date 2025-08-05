@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-operator
+  name: tenant-two
   namespace: argocd
   annotations: 
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "1"
   # Ensures resources are cleaned up before deletion
   # This finalizer is added by Argo CD to ensure that resources are cleaned up before the application is deleted.
   finalizers:
@@ -12,21 +12,21 @@ metadata:
 spec:
   project: system
   source:
-    chart: operator # minio-operator
+    chart: tenant 
     repoURL:  https://operator.min.io/
     targetRevision: 7.1.0
     helm:
-      releaseName: minio-operator  
+      releaseName: minio-tenant
       version: v3
-      valueFiles:
-        - ../values-operator.yaml
-      ignoreMissingValueFiles: true  
+      valuesFiles:
+        - ../values-tenant-two.yaml
+      ignoreMissingValueFiles: true
   destination:
-    namespace: minio-operator
+    namespace: tenant-two
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
-      - CreateNamespace=true    
+      - CreateNamespace=true  

@@ -1,0 +1,12 @@
+{{- range .Values.tenants }}
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: {{ include "minio.tenant.name" . }}
+  namespace: {{ .namespace }}
+spec:
+  replicas: {{ .replicas }}
+  volumesPerNode: {{ .volumesPerNode }}
+  # ... other tenant settings
+---
+{{- end }}
