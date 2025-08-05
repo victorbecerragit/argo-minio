@@ -12,17 +12,29 @@ tenant:
     accessKey: minio
     secretKey: minio123
   pools:
-    - servers: 1                   # Multi-node: 4 pods
+    - servers: 4                   # Multi-node: 4 pods
       name: pool-0
       volumesPerServer: 1          # Multi-drive: 4 drives per pod/node
       size: 2Gi                    # Size per volume = 4 x 2 = 8Gi
       storageClassName: standard   # storageClassName: directpv-min-io
-      tolerations: {}
+      tolerations: 
+        - key: minio-directpv
+          value: storage
+          effect: NoSchedule      
       nodeSelector: { }
-      affinity: { }
+      affinity: 
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: v1.min.io/tenant
+                    operator: In
+                    values:
+                      - tenant-one
+              topologyKey: "kubernetes.io/hostname"      
       resources:
         requests:
-          cpu: 200m
+          cpu: 512m
           memory: 512Mi
         limits:
           cpu: 1
