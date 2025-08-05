@@ -3,4 +3,4 @@ set -e
 
 kubectl apply -f ../argocd/project &&
 
-kubectl apply -f ../argocd/apps.yaml
+kubectl apply -f ../argocd/bootstrap/

@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-minio
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: project-minio
+  source:
+    repoURL: https://github.com/victorbecerragit/argo-minio.git
+    targetRevision: HEAD
+    path: argocd/minio
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: minio
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+

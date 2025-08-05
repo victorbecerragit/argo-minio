@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio-operator
+  namespace: argocd
+  annotations: 
+    argocd.argoproj.io/sync-wave: "0"
+  # Ensures resources are cleaned up before deletion
+  # This finalizer is added by Argo CD to ensure that resources are cleaned up before the application is deleted.
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: project-minio
+  sources:
+  - repoURL: https://operator.min.io/
+    chart: operator # minio-operator
+    targetRevision: 7.1.0
+    helm:
+      valueFiles:
+        - $values/helm/values-operator.yaml
+      ignoreMissingValueFiles: false
+  - repoURL: 'https://github.com/victorbecerragit/argo-minio.git'
+    targetRevision: HEAD
+    ref: values
+  destination:
+    namespace: minio-operator
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true    
