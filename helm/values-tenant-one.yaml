@@ -7,6 +7,10 @@ tenant:
   env:
     - name: MINIO_PROMETHEUS_AUTH_TYPE
       value: "public"
+  configSecret:
+    name: tenant-one-env-config
+    accessKey: minio
+    secretKey: minio123
   pools:
     - servers: 1                   # Multi-node: 4 pods
       name: pool-0
