@@ -11,16 +11,20 @@ metadata:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: project-minio
-  source:
+  sources:
+  - repoURL:  https://operator.min.io/
     chart: tenant 
-    repoURL:  https://operator.min.io/
     targetRevision: 7.1.0
     helm:
       releaseName: minio-tenant
       version: v3
       valuesFiles:
-        - ../values-tenant-one.yaml
-      ignoreMissingValueFiles: true
+        #- ../values-tenant-one.yaml
+        - $values/helm/values-tenant-one.yaml
+      ignoreMissingValueFiles: false
+  - repoURL: 'https://github.com/victorbecerragit/argo-minio.git'
+    targetRevision: HEAD
+    ref: values
   destination:
     namespace: tenant-one
     server: https://kubernetes.default.svc
