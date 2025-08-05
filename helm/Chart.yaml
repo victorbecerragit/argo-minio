@@ -1,5 +1,0 @@
-apiVersion: v2
-description: Helm Chart to deploy MinIO operator and tenants
-name: minio-helm
-version: 0.1.0
-appVersion: "7.1.1"
