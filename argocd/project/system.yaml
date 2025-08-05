@@ -10,6 +10,7 @@ spec:
   description: ArgoCD System Project
   sourceRepos:
     - https://operator.min.io/
+    - https://github.com/victorbecerragit/argo-minio.git
   sourceNamespaces:
   clusterResourceWhitelist:
     - group: '*'
