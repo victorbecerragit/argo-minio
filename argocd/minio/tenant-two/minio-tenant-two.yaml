@@ -16,7 +16,7 @@ spec:
     chart: tenant 
     targetRevision: 7.1.0
     helm:
-      valuesFiles:
+      valueFiles:
         - $values/helm/values-tenant-two.yaml
       ignoreMissingValueFiles: false
   - repoURL: 'https://github.com/victorbecerragit/argo-minio.git'
