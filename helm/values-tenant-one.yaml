@@ -1,3 +1,16 @@
+#eso:
+#  secret_store:
+#    name: infrastructure-vault
+#    kind: ClusterSecretStore
+#  wilcard_cert:
+#    vault_path: wildcard_cert
+#    crt_property: tls.crt
+#    key_property: tls.key
+#  minio:
+#    config_secret_path: minio/sample/config
+#    user_secret_property: user
+#    password_secret_property: password
+#    client_secret_property: openid-client-secret
 tenant:
   name: tenant-one
   image:
@@ -7,10 +20,31 @@ tenant:
   env:
     - name: MINIO_PROMETHEUS_AUTH_TYPE
       value: "public"
+#    - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
+#      value: "https://auth-infra.iride.earth/realms/intranet/.well-known/openid-configuration"
+#    - name: MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM
+#      value: "sample"
+#    - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
+#      value: "IRIDE SSO"
+#    - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
+#      value: "openid,email"
+#    - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
+#      value: "on"      
+#  configuration:
+#    name: minio-sample-config-external-secret
+#  configSecret:
+#    name: minio-sample-config-external-secret
+#    existingSecret: true      
   configSecret:
     name: tenant-one-env-config
     accessKey: minio
     secretKey: minio123
+  certificate:
+    requestAutoCert: false
+#    externalCertSecret:
+#      - name: minio-sample-wildcard-tls
+#        type: kubernetes.io/tls
+    certConfig: { }  
   pools:
     - servers: 4                   # Multi-node: 4 pods
       name: pool-one
@@ -61,11 +95,6 @@ tenant:
     enabled: true
     port: 9000
     protocol: http
-  certificate:
-    externalCaCertSecret: [ ]
-    externalCertSecret: [ ]
-    requestAutoCert: false
-    certConfig: { }
   features:
     bucketDNS: false
     domains: { }
@@ -86,6 +115,13 @@ ingress:
   api:
     enabled: true
     ingressClassName: "nginx"
+#    annotations:
+#      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+#    tls:
+#      - hosts:
+#          - minio-sample.iride.earth
+#        secretName: minio-sample-wildcard-tls
+#    host: minio-sample.iride.earth    
     tls: [ ]
     host: api.tenant-one.com
     path: /
@@ -93,8 +129,15 @@ ingress:
   console:
     enabled: true
     ingressClassName: "nginx"
-    labels: { }
+#    annotations:
+#      nginx.ingress.kubernetes.io/backend-protocol: HTTPS    
     annotations: { }
+    labels: { }
+#    tls:
+#      - hosts:
+#          - minio-console-sample.iride.earth
+#        secretName: minio-sample-wildcard-tls
+#    host: minio-console-sample.iride.earth    
     tls: [ ]
     host: console.tenant-one.com
     path: /
