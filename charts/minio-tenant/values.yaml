@@ -1,0 +1,71 @@
+eso:
+  secret_store:
+    name: infrastructure-vault
+    kind: ClusterSecretStore
+  wilcard_cert:
+    vault_path: wildcard_cert
+    crt_property: tls.crt
+    key_property: tls.key
+  minio:
+    config_secret_path: minio/sample/config
+    user_secret_property: user
+    password_secret_property: password
+    client_secret_property: openid-client-secret
+tenant:
+  tenant:
+    name: sample
+    pools:
+      - servers: 1
+        name: pool-0
+        volumesPerServer: 4
+        size: 5Gi
+        # tolerations:
+        #   - key: "dedicated"
+        #     operator: "Equal"
+        #     value: "minio"
+        #     effect: "NoSchedule"
+        # nodeSelector:
+        #   dedicated: minio
+    certificate:
+      requestAutoCert: false
+      externalCertSecret:
+        - name: minio-sample-wildcard-tls
+          type: kubernetes.io/tls
+    configuration:
+      name: minio-sample-config-external-secret
+    configSecret:
+      name: minio-sample-config-external-secret
+      existingSecret: true
+    env:
+      - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
+        value: "https://auth-infra.iride.earth/realms/intranet/.well-known/openid-configuration"
+      - name: MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM
+        value: "sample"
+      - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
+        value: "IRIDE SSO"
+      - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
+        value: "openid,email"
+      - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
+        value: "on"
+  ingress:
+    api:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      tls:
+        - hosts:
+            - minio-sample.iride.earth
+          secretName: minio-sample-wildcard-tls
+      host: minio-sample.iride.earth
+    console:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      tls:
+        - hosts:
+            - minio-console-sample.iride.earth
+          secretName: minio-sample-wildcard-tls
+      host: minio-console-sample.iride.earth
+         
