@@ -1,13 +1,18 @@
-```yaml
+
 # argo-minio
 
 Test mono repo to deploy minio Operator and Tenant with ArgoCD and directpv
 
+
 # The folder scripts contains:
 
- - bootstrap-directpv.sh (This script install and configure directpv with the dedicated nodes for minio operations)
- - directpv-addNode.sh (This script will add an additional node to directpv to expand the storage capacity available for minio)
- - bootstrap-argo.sh (kubectl apply of argocd/project/project-minio.yaml and  argocd/bootstrap/apps.yaml that will deploy Argocd App from folder argocd/minio)
+| Application | Description |
+|-------------|-------------|
+| [bootstrap-directpv](scripts/bootstrap-directpv.sh) | This script install and configure directpv with the dedicated nodes for minio operations |
+| [directpv-addNode](scripts/directpv-addNode.sh) | This script will add an additional node to directpv to expand the storage capacity available for minio  |
+| [bootstrap-argoy](scripts/bootstrap-argo.sh) | kubectl apply of argocd/project/project-minio.yaml and  argocd/bootstrap/apps.yaml that will deploy Argocd App from folder argocd/minio |
+
+```yaml
 
 # DirectPV 
 
@@ -29,20 +34,23 @@ taints:
 - Effect: NoSchedule → Pods that don’t tolerate this taint will not be scheduled on this node.
 
 Directpv and minio will respect this toleration.
+```
 
 # argocd
 
-- argocd/bootstrap/ > app of apps -  apps.yaml defined as root-app to handle minio operator and minio tenants.
-- argocd/minio/operator > argocd app to handle minio-operator will look at helm/values-operator.yaml behing path /helm.
-- argocd/minio/tenant-one > argocd app to handle minio-operator will look at helm/values-tenant-one.yaml behing path /helm.
-- argocd/minio/tenant-two > argocd app to handle minio-operator will look at helm/values-tenant-two.yaml behing path /helm.
-- argocd/project | Argo project - Project specifically created to handle minio applications, it allow to key minio in a controller space behind ArgoCD.
+| Application | Description |
+|-------------|-------------|
+| [argocd/bootstrap/](argocd/bootstrap/) | app of apps -  apps.yaml defined as root-app to handle minio operator and minio tenants. |
+| [argocd/minio/operator](argocd/minio/operator) | argocd app to handle minio-operator will look at helm/values-operator.yaml behing path /helm.  |
+| [argocd/minio/tenant-one](argocd/minio/tenant-one) | argocd app to handle minio-operator will look at helm/values-tenant-one.yaml behing path /helm. |
+| [argocd/minio/tenant-two](argocd/minio/tenant-two) | argocd app to handle minio-operator will look at helm/values-tenant-two.yaml behing path /helm. |
+| [argocd/project](argocd/project) | Argo project - Project specifically created to handle minio applications, it allow to key minio in a controller space behind ArgoCD. |
 
-
+```yaml
 # Minio operator and tenants custom helm chart definitions with ESO (external secrets operator) copied on /charts 
 
+# Experimental Optional to deploy minio using Helm Chart directly - TODO helm-chart definitions using helm templates, it could be complex to handle having many tenants.
 
-# Experimental - TODO helm-chart definitions using helm templates, it could be complex to handle having many tenants.
 helm-chart
   Chart.yaml
   templates
