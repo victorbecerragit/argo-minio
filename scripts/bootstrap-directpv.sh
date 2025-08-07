@@ -3,7 +3,7 @@
 # Exit immediately on failure of any command within a pipeline
 set -o pipefail
 
-# Kubeconfig
+# Kubeconfig optionally passed as the first argument
 KUBECONFIG=${1}
 
 # Export KUBECONFIG
@@ -24,12 +24,14 @@ echo "Installing DirectPV binary"
 # Download DirectPV plugin.
 release=$(curl -sfL "https://api.github.com/repos/minio/directpv/releases/latest" | awk '/tag_name/ { print substr($2, 3, length($2)-4) }')
 curl -fLo kubectl-directpv https://github.com/minio/directpv/releases/download/v${release}/kubectl-directpv_${release}_linux_amd64
+
 # Make the binary executable.
 chmod a+x kubectl-directpv 
 sudo mv kubectl-directpv /usr/local/bin/kubectl-directpv  >> "$LOG_FILE" 2>&1 || log_error_and_exit "sudo mv"
 
-echi "Label nodes for directpv installation directpv=yes"
-# Label nodes for directpv
+echo "Label nodes for directpv installation directpv=yes"
+# TODO Replace node's name with actual nodes for directpv installation
+# Ensure the correct nodes are passed here before installation - this is crucial for DirectPV to function correctly.
 kubectl label nodes minioclu-06 directpv=yes
 kubectl label nodes minioclu-07 directpv=yes
 kubectl label nodes minioclu-08 directpv=yes
@@ -38,7 +40,9 @@ kubectl label nodes minioclu-09 directpv=yes
 echo "Installing DirectPV with labels and toleration..." | tee -a "$LOG_FILE"
 kubectl directpv install --node-selector directpv=yes --tolerations minio-directpv=storage:NoSchedule >> "$LOG_FILE" 2>&1 || log_error_and_exit "directpv install"
 
-sleep 60 
+# Wait for DirectPV to be ready
+echo "Waiting for DirectPV to be ready..." | tee -a "$LOG_FILE"
+kubectl wait --for=condition=Ready pod -l app=directpv --timeout=120s >> "$LOG_FILE" 2>&1 || log_error_and_exit "kubectl wait"
 
 echo "Show node names..." | tee -a "$LOG_FILE"
 NODE_LIST=$(kubectl directpv info | awk -F '│' '/•/ {gsub(/•| /, "", $2); print $2}') >> "$LOG_FILE" 2>&1 || log_error_and_exit "directpv info"
@@ -54,12 +58,11 @@ fi
 
 echo "Discovering available disks..." | tee -a "$LOG_FILE"
 
-while IFS= read -r node; do
-  kubectl directpv discover --nodes="${node}" >> "$LOG_FILE" 2>&1 || log_error_and_exit "directpv discover"
-  #kubectl directpv discover --nodes="${node}" >> "$LOG_FILE" 2>&1 
-done <<< "$NODE_LIST"
+kubectl directpv discover  >> "$LOG_FILE" 2>&1  || log_error_and_exit "directpv discover"
 
 # Optionally wait or confirm before proceeding
+# This step is crucial as it formats the disks and destroys data.
+
 read -p "Do you have a drives.yaml ready? This step will format disks and destroy data! (y/n): " CONFIRM
 if [[ "$CONFIRM" != "y" ]]; then
   echo "Aborting before disk init. Prepare your drives.yaml file first." | tee -a "$LOG_FILE"

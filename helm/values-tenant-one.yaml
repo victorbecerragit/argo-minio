@@ -68,11 +68,11 @@ tenant:
               topologyKey: "kubernetes.io/hostname"      
       resources:
         requests:
-          cpu: 512m
-          memory: 512Mi
-        limits:
           cpu: 1
-          memory: 1Gi
+          memory: 1
+        limits:
+          cpu: 3
+          memory: 4Gi
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

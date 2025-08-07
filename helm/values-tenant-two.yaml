@@ -22,11 +22,11 @@ tenant:
       affinity: { }
       resources:
         requests:
-          cpu: 200m
-          memory: 512Mi
-        limits:
           cpu: 1
           memory: 1Gi
+        limits:
+          cpu: 3
+          memory: 4Gi
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
