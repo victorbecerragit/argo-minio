@@ -1,7 +1,7 @@
+```yaml
 # argo-minio
 
 Test mono repo to deploy minio Operator and Tenant with ArgoCD and directpv
-
 
 # The folder scripts contains:
 
@@ -19,10 +19,12 @@ Storage Pre-requisite:
 Node created with longhorn disabled and predefined drivers without partition on it.
 The node should be added in the cluster with the following tain:
 
+
 taints:
     - effect: NoSchedule
       key: minio-directpv
       value: storage
+
 
 - Effect: NoSchedule → Pods that don’t tolerate this taint will not be scheduled on this node.
 
