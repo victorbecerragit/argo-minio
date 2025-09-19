@@ -1,0 +1,15 @@
+FROM bitnami/kubectl:latest
+
+# Install dependencies for curl and awk
+USER root
+RUN install_packages curl gawk
+
+# Download and install DirectPV plugin fixed to version v4.1.5
+RUN echo "Installing DirectPV binary" && \
+    curl -fLo /usr/local/bin/kubectl-directpv  https://github.com/minio/directpv/releases/download/v4.1.5/kubectl-directpv_4.1.5_linux_amd64 && \
+    chmod a+x /usr/local/bin/kubectl-directpv
+
+# Add plugin dir to PATH (kubectl plugin mechanism)
+ENV PATH="/usr/local/bin:${PATH}"
+
+ENTRYPOINT [ "kubectl" ]

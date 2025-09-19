@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: directpv-info-scheduled
+  namespace: directpv
+spec:
+  schedule: "*/60 * * * *" # Runs every 60 minutes; adjust as needed
+  concurrencyPolicy: Forbid  # Prevent overlapping executions
+  successfulJobsHistoryLimit: 2 # Keep last 2 successful jobs
+  suspend: false # Set to true to pause the cronjob
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccount: directpv-min-io
+          restartPolicy: OnFailure
+          containers:
+          - name: directpv-discover
+            
+            image: victorbecerra/kubectl-directpv:v4.1.5
+            command:
+              - /bin/sh
+              - -c
+              - kubectl directpv info && kubectl directpv list drives && kubectl directpv list volumes
+

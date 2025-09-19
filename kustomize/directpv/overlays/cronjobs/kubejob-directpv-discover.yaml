@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: directpv-discovery-scheduled
+  namespace: directpv
+spec:
+  schedule: "*/10 * * * *" # Runs every 10 minutes; adjust as needed
+  #schedule: "0 2 */7 * *"  # Weekly on Sunday at 2 AM for less frequent runs
+  concurrencyPolicy: Forbid  # Prevent overlapping executions
+  successfulJobsHistoryLimit: 2 # Keep last 2 successful jobs
+  failedJobsHistoryLimit: 1  # Keep last 1 failed jobs
+  suspend: false # Set to true to pause the cronjob
+  jobTemplate:
+    spec:
+      backoffLimit: 1 # Retry up to 1 times on failure
+      activeDeadlineSeconds: 1800  # 30 minutes timeout    
+      template:
+        spec:
+          nodeSelector:
+            directpv-controller: "yes"
+          containers:
+            - name: directpv
+              image: victorbecerra/directpv-discover:v4.1.5
+              imagePullPolicy: Always
+              command: ["/bin/sh", "-c", "/usr/local/bin/directpv-discovery.sh"]
+              env:
+                - name: DANGEROUS_MODE
+                  value: "false"  # Set to "true" to enable dangerous mode and initialize drives and restore the value to "false" after use it to avoid issues.
+                - name: WAIT_TIME
+                  value: "10m"  # Wait time for discovery command
+              resources:
+                limits:
+                  memory: "512Mi"
+                  cpu: "500m"
+                requests:
+                  memory: "256Mi"
+                  cpu: "250m"
+              tty: true
+          restartPolicy: Never
+          dnsPolicy: ClusterFirst
+          enableServiceLinks: true
+          serviceAccountName: directpv-min-io
+          terminationGracePeriodSeconds: 30

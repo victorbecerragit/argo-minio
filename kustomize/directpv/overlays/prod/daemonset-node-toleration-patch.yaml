@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-server
+spec:
+  template:
+    spec:
+      nodeSelector:
+        directpv-node: "yes"
+      tolerations:
+        - key: minio-directpv
+          value: storage
+          effect: NoSchedule

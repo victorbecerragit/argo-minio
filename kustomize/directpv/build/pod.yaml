@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: directpv-discovery
+  namespace: directpv
+spec:
+  containers:
+  - command: ["/bin/sh", "-c", "/usr/local/bin/directpv-discovery.sh"]
+    env:
+    - name: DANGEROUS_MODE
+      value: "true"
+    image: victorbecerra/directpv-discover:v4.1.5
+    imagePullPolicy: IfNotPresent
+    name: directpv
+    resources: {}
+    tty: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: minioclu-05
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: directpv-min-io
+  serviceAccountName: directpv-min-io
+  terminationGracePeriodSeconds: 30
