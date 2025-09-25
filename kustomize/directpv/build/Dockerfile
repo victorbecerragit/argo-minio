@@ -1,25 +1,28 @@
-FROM bitnami/kubectl:latest
+FROM alpine:3.19 
 
-# Install dependencies for curl and awk
-USER root
-RUN install_packages curl gawk
+# Install required packages
+RUN apk add --no-cache curl bash ca-certificates
 
-# Download and install DirectPV plugin fixed to version 4.1.5
-RUN echo "Installing DirectPV binary" && \
-    curl -fLo /usr/local/bin/kubectl-directpv  https://github.com/minio/directpv/releases/download/v4.1.5/kubectl-directpv_4.1.5_linux_amd64 && \
-    chmod a+x /usr/local/bin/kubectl-directpv
+# Install kubectl version 1.31.0
+RUN curl -LO "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl" && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
 
-# Add plugin dir to PATH (kubectl plugin mechanism)
+# Install kubectl-directpv plugin fixed for version v4.1.5
+RUN curl -fLo /usr/local/bin/kubectl-directpv https://github.com/minio/directpv/releases/download/v4.1.5/kubectl-directpv_4.1.5_linux_amd64 && \
+    chmod +x /usr/local/bin/kubectl-directpv
+
 ENV PATH="/usr/local/bin:${PATH}"
 
-#ENTRYPOINT [ "kubectl" ]
-
-# Copy the directpv-discovery script
+# Add your directpv-discovery script
+#COPY docker/directpv-discovery/directpv-discovery.sh /usr/local/bin/directpv-discovery.sh
 COPY directpv-discovery.sh /usr/local/bin/directpv-discovery.sh
 RUN chmod +x /usr/local/bin/directpv-discovery.sh
 
-# Set working directory
 WORKDIR /tmp
 
-# Set the entrypoint
-ENTRYPOINT ["/usr/local/bin/directpv-discovery.sh"]
+# Let CMD be overridable so you can run either kubectl or your script
+CMD ["kubectl"]
+
+
+
