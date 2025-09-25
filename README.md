@@ -1,8 +1,9 @@
 
 # argo-minio
 
-Test mono repo to deploy minio Operator and Tenant with ArgoCD and directpv
+Test mono repo to deploy minio Operator, Tenant  and directpv with ArgoCD
 
+POC repository used to implemented customer production environment with minio Infrastructure MNMD (Multi-Node Multi-Drive)
 
 # The folder scripts contains:
 
