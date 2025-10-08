@@ -1,0 +1,80 @@
+tenant:
+  name: tenant-beta
+  image:
+    repository: quay.io/minio/minio
+    tag: RELEASE.2025-04-08T15-41-24Z
+    pullPolicy: IfNotPresent
+  env:
+    - name: MINIO_PROMETHEUS_AUTH_TYPE
+      value: "public"
+  configSecret:
+    name: tenant-beta-env-config
+    accessKey: minio
+    secretKey: minio123
+  pools:
+    - servers: 2
+      name: pool-beta
+      volumesPerServer: 1
+      size: 1Gi
+      storageClassName: standard
+      tolerations: [ ]
+      nodeSelector: 
+        directpv: "yes"
+      affinity: { }
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+        runAsNonRoot: true
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+  mountPath: /export
+  subPath: /data
+  metrics:
+    enabled: true
+    port: 9000
+    protocol: http
+  certificate:
+    externalCaCertSecret: [ ]
+    externalCertSecret: [ ]
+    requestAutoCert: false
+    certConfig: { }
+  features:
+    bucketDNS: false
+    domains: { }
+    enableSFTP: false
+  buckets: 
+    - name: beta-bucket
+      region: us-east-1
+      objectLock: true
+  users: [ ]
+  podManagementPolicy: Parallel
+  serviceAccountName: ""
+  prometheusOperator: false
+
+ingress:
+  api:
+    enabled: true
+    ingressClassName: "nginx"
+    tls: [ ]
+    host: api.tenant-beta.com
+    path: /
+    pathType: Prefix
+  console:
+    enabled: true
+    ingressClassName: "nginx"
+    labels: { }
+    annotations: { }
+    tls: [ ]
+    host: console.tenant-beta.com
+    path: /
+    pathType: Prefix

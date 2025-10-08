@@ -1,0 +1,29 @@
+{{- if and .Values.sts.policyManagement.enabled (eq .Values.sts.policyManagement.method "job") }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tenant.fullname" . }}-policies
+  namespace: {{ .Values.tenant.namespace }}
+  labels:
+    {{- include "tenant.policyLabels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+{{- range $roleName, $roleConfig := .Values.policies }}
+{{- if $roleConfig.enabled }}
+{{- include "tenant.validatePolicy" $roleConfig }}
+  {{ $roleConfig.name }}.json: |
+    {{- include "tenant.policyJson" $roleConfig | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- range $customName, $customConfig := .Values.policies.custom }}
+{{- if $customConfig.enabled }}
+{{- include "tenant.validatePolicy" $customConfig }}
+  {{ $customConfig.name }}.json: |
+    {{- include "tenant.policyJson" $customConfig | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

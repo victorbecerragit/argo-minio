@@ -1,0 +1,297 @@
+# MinIO Tenant Helm Values with PolicyBinding Integration
+# This configuration requires MinIO Operator v5.0.0+ with STS enabled
+
+# Global settings
+global:
+  # MinIO tenant configuration
+  tenantName: minio-tenant
+  namespace: minio-tenant-ns
+
+# Tenant configuration
+tenant:
+  name: minio-tenant
+  namespace: minio-tenant-ns
+
+  # Basic tenant settings
+  configuration:
+    name: minio-tenant-config
+
+  # Pool configuration
+  pools:
+  - name: pool-0
+    servers: 4
+    volumesPerServer: 4
+    size: 10Gi
+    storageClassName: local-path
+
+# STS and PolicyBinding configuration
+sts:
+  # Enable STS features (requires operator STS to be enabled)
+  enabled: true
+
+  # Enable PolicyBinding resource creation
+  policyBindingEnabled: true
+
+  # Policy management configuration
+  policyManagement:
+    # Enable automatic policy creation
+    enabled: true
+
+    # Policy creation method
+    # Options: "job" (Kubernetes Job), "configmap" (ConfigMap only), "none" (manual)
+    method: "job"
+
+    # Job configuration for policy creation
+    job:
+      # Enable policy setup job
+      enabled: true
+      # Job image
+      image: minio/mc:latest
+      # Restart policy
+      restartPolicy: Never
+      # Service account for job
+      serviceAccount:
+        name: minio-policy-admin
+        create: true
+
+# Policy definitions and role mappings
+policies:
+  # Administrator role
+  administrator:
+    # Enable this policy
+    enabled: true
+    # Policy name in MinIO
+    name: administrator-policy
+    # Description
+    description: "Full administrative access to all MinIO operations"
+    # Policy definition
+    policy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action: ["*"]
+        Resource: ["*"]
+    # Service account configuration
+    serviceAccount:
+      name: administrator-sa
+      create: true
+      # Additional annotations for service account
+      annotations: {}
+      # Additional labels
+      labels:
+        app.kubernetes.io/role: administrator
+    # PolicyBinding configuration
+    policyBinding:
+      enabled: true
+      name: administrator-binding
+      # Additional metadata
+      annotations: {}
+      labels: {}
+
+  # Auditor role  
+  auditor:
+    enabled: true
+    name: auditor-policy
+    description: "Read-only access to logs and system information"
+    policy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "admin:ServerInfo"
+        - "admin:ListUsers"
+        - "admin:ListGroups"
+        - "admin:ListPolicies"
+        - "admin:GetBucketQuota"
+        - "admin:GetConfig"
+        - "admin:DescribeConfig"
+        - "admin:ConfigHistory"
+        - "admin:ConsoleLog"
+        - "admin:KMSKeyStatus"
+        - "admin:Heal"
+        - "admin:ServerTrace"
+        Resource: ["*"]
+      - Effect: Allow
+        Action:
+        - "s3:ListAllMyBuckets"
+        - "s3:ListBucket"
+        - "s3:GetBucketLocation"
+        - "s3:GetBucketVersioning"
+        - "s3:GetBucketNotification"
+        Resource: ["*"]
+    serviceAccount:
+      name: auditor-sa
+      create: true
+      annotations: {}
+      labels:
+        app.kubernetes.io/role: auditor
+    policyBinding:
+      enabled: true
+      name: auditor-binding
+      annotations: {}
+      labels: {}
+
+  # Datalake Admin role
+  datalakeAdmin:
+    enabled: true
+    name: datalake-admin-policy
+    description: "Full access to S3 operations and user management"
+    policy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action: ["s3:*"]
+        Resource:
+        - "arn:aws:s3:::*"
+        - "arn:aws:s3:::*/*"
+      - Effect: Allow
+        Action:
+        - "admin:CreateUser"
+        - "admin:DeleteUser"
+        - "admin:ListUsers"
+        - "admin:EnableUser"
+        - "admin:DisableUser"
+        - "admin:CreateServiceAccount"
+        - "admin:UpdateServiceAccount"
+        - "admin:RemoveServiceAccount"
+        - "admin:ListServiceAccounts"
+        - "admin:CreatePolicy"
+        - "admin:DeletePolicy"
+        - "admin:GetPolicy"
+        - "admin:AttachUserPolicy"
+        - "admin:AttachGroupPolicy"
+        - "admin:SetBucketQuota"
+        - "admin:GetBucketQuota"
+        Resource: ["*"]
+    serviceAccount:
+      name: datalake-admin-sa
+      create: true
+      annotations: {}
+      labels:
+        app.kubernetes.io/role: datalake-admin
+    policyBinding:
+      enabled: true
+      name: datalake-admin-binding
+      annotations: {}
+      labels: {}
+
+  # Datalake Viewer role
+  datalakeViewer:
+    enabled: true
+    name: datalake-viewer-policy
+    description: "Read-only access to all S3 buckets"
+    policy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "s3:GetBucketLocation"
+        - "s3:GetObject"
+        - "s3:ListBucket"
+        - "s3:ListAllMyBuckets"
+        - "s3:GetBucketVersioning"
+        - "s3:GetBucketNotification"
+        - "s3:ListBucketVersions"
+        - "s3:GetObjectVersion"
+        Resource:
+        - "arn:aws:s3:::*"
+        - "arn:aws:s3:::*/*"
+    serviceAccount:
+      name: datalake-viewer-sa
+      create: true
+      annotations: {}
+      labels:
+        app.kubernetes.io/role: datalake-viewer
+    policyBinding:
+      enabled: true
+      name: datalake-viewer-binding
+      annotations: {}
+      labels: {}
+
+  # Guest role
+  guest:
+    enabled: true
+    name: guest-policy
+    description: "Limited access to public buckets only"
+    policy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "s3:GetObject"
+        - "s3:ListBucket"
+        Resource:
+        - "arn:aws:s3:::public"
+        - "arn:aws:s3:::public/*"
+        - "arn:aws:s3:::public-*"
+        - "arn:aws:s3:::public-*/*"
+    serviceAccount:
+      name: guest-sa
+      create: true
+      annotations: {}
+      labels:
+        app.kubernetes.io/role: guest
+    policyBinding:
+      enabled: true
+      name: guest-binding
+      annotations: {}
+      labels: {}
+
+  # Custom policies support
+  custom: {}
+    # Example custom policy:
+    # customRole:
+    #   enabled: true
+    #   name: custom-policy
+    #   description: "Custom policy description"
+    #   policy:
+    #     Version: "2012-10-17"
+    #     Statement:
+    #     - Effect: Allow
+    #       Action: ["s3:GetObject"]
+    #       Resource: ["arn:aws:s3:::custom-bucket/*"]
+    #   serviceAccount:
+    #     name: custom-sa
+    #     create: true
+    #   policyBinding:
+    #     enabled: true
+    #     name: custom-binding
+
+# Additional configurations
+rbac:
+  # Create RBAC resources for policy management
+  create: true
+
+  # ClusterRole for policy management
+  policyAdmin:
+    name: minio-policy-admin
+    rules:
+    - apiGroups: [""]
+      resources: ["secrets", "configmaps"]
+      verbs: ["get", "list", "create", "update", "patch", "delete"]
+    - apiGroups: ["batch"]
+      resources: ["jobs"]
+      verbs: ["get", "list", "create", "update", "patch", "delete"]
+    - apiGroups: ["sts.min.io"]
+      resources: ["policybindings"]
+      verbs: ["get", "list", "create", "update", "patch", "delete"]
+
+# Resource limits and requests
+resources:
+  policySetupJob:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Additional metadata
+commonLabels:
+  app.kubernetes.io/name: minio-tenant
+  app.kubernetes.io/instance: minio-tenant
+  app.kubernetes.io/version: "RELEASE.2024-10-02T17-50-41Z"
+  app.kubernetes.io/component: object-storage
+  app.kubernetes.io/part-of: minio-operator
+
+commonAnnotations: {}

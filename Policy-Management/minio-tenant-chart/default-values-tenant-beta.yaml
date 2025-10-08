@@ -1,0 +1,101 @@
+# Default values for minio-tenant-chart.
+ingress:
+  api:
+    annotations: {}
+    enabled: false
+    host: minio.local
+    ingressClassName: ""
+    labels: {}
+    path: /
+    pathType: Prefix
+    tls: []
+  console:
+    annotations: {}
+    enabled: false
+    host: minio-console.local
+    ingressClassName: ""
+    labels: {}
+    path: /
+    pathType: Prefix
+    tls: []
+tenant:
+  additionalVolumeMounts: []
+  additionalVolumes: []
+  buckets: 
+    - name: benchmark-bucket
+      region: us-east-1
+      objectLock: false
+  certificate:
+    certConfig: {}
+    externalCaCertSecret: []
+    externalCertSecret: []
+    requestAutoCert: false
+  configSecret:
+    accessKey: minio
+    name: myminio-env-configuration
+    secretKey: minio123
+  env: []
+  exposeServices: {}
+  features:
+    bucketDNS: false
+    domains: {}
+    enableSFTP: false
+  image:
+    pullPolicy: IfNotPresent
+    repository: quay.io/minio/minio
+    tag: RELEASE.2025-04-08T15-41-24Z
+  imagePullSecret: {}
+  initContainers: []
+  lifecycle: {}
+  liveness: {}
+  logging: {}
+  metrics:
+    enabled: false
+    port: 9000
+    protocol: http
+  mountPath: /export
+  name: myminio
+  podManagementPolicy: Parallel
+  pools:
+  - affinity: {}
+    annotations: {}
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    labels: {}
+    name: pool-0
+    nodeSelector: 
+      directpv: "yes"
+    resources: {}
+    securityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    servers: 4
+    size: 5Gi
+    storageAnnotations: {}
+    storageLabels: {}
+    tolerations: []
+    topologySpreadConstraints: []
+    volumesPerServer: 4
+  poolsMetadata:
+    annotations: {}
+    labels: {}
+  priorityClassName: ""
+  prometheusOperator: false
+  readiness: {}
+  scheduler: {}
+  serviceAccountName: ""
+  serviceMetadata: {}
+  startup: {}
+  subPath: /data
+  users: []

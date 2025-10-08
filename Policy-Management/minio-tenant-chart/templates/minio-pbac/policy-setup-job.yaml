@@ -1,0 +1,128 @@
+{{- if and .Values.sts.policyManagement.enabled .Values.sts.policyManagement.job.enabled (eq .Values.sts.policyManagement.method "job") }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "tenant.fullname" . }}-policy-setup
+  namespace: {{ .Values.tenant.namespace }}
+  labels:
+    {{- include "tenant.policyLabels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-setup-job
+  annotations:
+    # Helm hooks to ensure job runs after tenant is ready
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation # keep the job history
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "tenant.policyLabels" . | nindent 8 }}
+        app.kubernetes.io/component: policy-setup-job
+    spec:
+      serviceAccountName: {{ .Values.sts.policyManagement.job.serviceAccount.name }}
+      restartPolicy: {{ .Values.sts.policyManagement.job.restartPolicy }}
+      initContainers:
+      - name: wait-for-minio
+        image: busybox:1.35
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          echo "Waiting for MinIO tenant to be ready..."
+          until nc -z {{ .Values.tenant.name }}-hl.{{ .Values.tenant.namespace }}.svc.cluster.local 9000; do
+            echo "MinIO not ready yet, waiting..."
+            sleep 30
+          done
+          echo "MinIO is ready!"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 50m
+            memory: 32Mi
+      containers:
+      - name: mc-policy-setup
+        image: {{ .Values.sts.policyManagement.job.image }}
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          set -e
+          echo "Envs..."
+          source /config/config.env
+          
+          echo "Setting up MinIO client alias..."
+          mc alias set minio https://{{ .Values.tenant.name }}-hl.{{ .Values.tenant.namespace }}.svc.cluster.local:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD --insecure
+
+          echo "Creating policies..."
+
+          {{- range $roleName, $roleConfig := .Values.policies }}
+          {{- if $roleConfig.enabled }}
+          echo "Creating policy: {{ $roleConfig.name }}"
+          mc admin policy create minio {{ $roleConfig.name }} /policies/{{ $roleConfig.name }}.json --insecure || true
+          {{- end }}
+          {{- end }}
+
+          {{- range $customName, $customConfig := .Values.policies.custom }}
+          {{- if $customConfig.enabled }}
+          echo "Creating custom policy: {{ $customConfig.name }}"
+          mc admin policy create minio {{ $customConfig.name }} /policies/{{ $customConfig.name }}.json --insecure || true
+          {{- end }}
+          {{- end }}
+
+          echo "All policies created successfully!"
+
+          # List policies to verify
+          echo "Available policies:"
+          mc admin policy ls minio --insecure
+
+          echo "minio info:"
+          mc admin info minio --insecure
+
+          echo "Creating additional users and attaching policies..."
+          mc admin user add minio admin-minio adminpass1 --insecure || true
+          mc admin user add minio auditor-minio auditorpass1 --insecure || true
+          mc admin user add minio datalake-admin datalakeadminpass1 --insecure || true
+          mc admin user add minio datalake-viewer datalakeviewerpass1 --insecure || true
+          mc admin user add minio guest-minio guestpass1 --insecure || true
+
+          # Attach custom policies (ensure you created these before)
+          mc admin policy attach minio administrator-policy --user=admin-minio --insecure || true
+          mc admin policy attach minio auditor-policy --user=auditor-minio --insecure || true
+          mc admin policy attach minio datalake-admin-policy --user=datalake-admin --insecure || true
+          mc admin policy attach minio datalake-viewer-policy --user=datalake-viewer --insecure || true
+          mc admin policy attach minio guest-policy --user=guest-minio --insecure || true
+
+          echo "All users created and policies attached successfully!"
+
+          # List users to verify
+          echo "minio user list:"
+          mc admin user list minio --insecure
+          
+          echo "Policy setup completed!"
+          
+        volumeMounts:
+        - name: policy-definitions
+          mountPath: /policies
+        - name: minio-env
+          mountPath: /config/  # or any path your app expects          
+        {{- with .Values.resources.policySetupJob }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: policy-definitions
+        configMap:
+          name: {{ include "tenant.fullname" . }}-policies
+      - name: minio-env
+        secret:
+          secretName: {{ .Values.tenant.configSecret.name }}          
+{{- end }}

@@ -1,0 +1,85 @@
+1. Get the application URL by running these commands:
+
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "tenant.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+
+
+## MinIO Tenant Policy Management
+
+{{- if .Values.sts.enabled }}
+### STS Configuration
+✅ STS is enabled for this tenant
+
+{{- if .Values.sts.policyBindingEnabled }}
+✅ PolicyBinding resources will be created
+{{- else }}
+⚠️  PolicyBinding creation is disabled
+{{- end }}
+
+### Available Service Accounts and Policies:
+{{- range $roleName, $roleConfig := .Values.policies }}
+{{- if $roleConfig.enabled }}
+
+**{{ $roleName | title }} Role:**
+- Service Account: {{ include "tenant.serviceAccountName" (dict "serviceAccount" $roleConfig.serviceAccount "roleName" $roleName "root" $) }}
+- Policy: {{ $roleConfig.name }}
+- Description: {{ $roleConfig.description }}
+{{- if $roleConfig.policyBinding.enabled }}
+- PolicyBinding: {{ include "tenant.policyBindingName" (dict "policyBinding" $roleConfig.policyBinding "roleName" $roleName "root" $) }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+### Using Service Accounts:
+To use a service account in your applications:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  template:
+    spec:
+      serviceAccountName: administrator-sa  # Use appropriate SA
+      containers:
+      - name: app
+        image: my-app:latest
+        env:
+        - name: AWS_ROLE_ARN
+          value: "arn:minio:iam:::role/administrator-policy"
+        - name: AWS_WEB_IDENTITY_TOKEN_FILE
+          value: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+```
+
+### Verify Policy Setup:
+Check if policies were created successfully:
+```bash
+kubectl logs job/{{ include "tenant.fullname" . }}-policy-setup -n {{ .Values.tenant.namespace }}
+```
+
+### Test Access:
+Test service account access:
+```bash
+kubectl run test-pod --image=minio/mc:latest --serviceaccount=datalake-viewer-sa -n {{ .Values.tenant.namespace }} -- sleep 3600
+kubectl exec -it test-pod -n {{ .Values.tenant.namespace }} -- mc ls minio/
+```
+
+{{- else }}
+⚠️  STS is not enabled. PolicyBinding resources will not be created.
+   To enable STS, set sts.enabled=true and ensure MinIO Operator has OPERATOR_STS_ENABLED=on
+{{- end }}
+
+{{- if .Values.sts.policyManagement.enabled }}
+### Policy Management:
+✅ Automatic policy creation is enabled
+{{- if eq .Values.sts.policyManagement.method "job" }}
+✅ Policies will be created via Kubernetes Job
+{{- else }}
+ℹ️  Manual policy management is configured
+{{- end }}
+{{- else }}
+⚠️  Automatic policy management is disabled
+{{- end }}

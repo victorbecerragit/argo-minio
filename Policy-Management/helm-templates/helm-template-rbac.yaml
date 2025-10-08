@@ -1,0 +1,55 @@
+{{- if and .Values.rbac.create .Values.sts.policyManagement.enabled }}
+---
+# ClusterRole for policy management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.rbac.policyAdmin.name }}
+  labels:
+    {{- include "tenant.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rbac
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+{{- toYaml .Values.rbac.policyAdmin.rules | nindent 0 }}
+---
+# ClusterRoleBinding for policy management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "tenant.fullname" . }}-policy-admin
+  labels:
+    {{- include "tenant.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rbac
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.rbac.policyAdmin.name }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.sts.policyManagement.job.serviceAccount.name }}
+  namespace: {{ .Values.tenant.namespace }}
+{{- if .Values.sts.policyManagement.job.serviceAccount.create }}
+---
+# Service Account for policy management job
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.sts.policyManagement.job.serviceAccount.name }}
+  namespace: {{ .Values.tenant.namespace }}
+  labels:
+    {{- include "tenant.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-admin
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: true
+{{- end }}
+{{- end }}

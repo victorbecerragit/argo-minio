@@ -1,0 +1,41 @@
+{{- if and .Values.sts.enabled .Values.sts.policyBindingEnabled }}
+{{- $stsEnabled := include "tenant.stsEnabled" . }}
+{{- if eq $stsEnabled "true" }}
+{{- range $roleName, $roleConfig := .Values.policies }}
+{{- if and $roleConfig.enabled $roleConfig.policyBinding.enabled }}
+{{- include "tenant.validatePolicy" $roleConfig }}
+---
+apiVersion: sts.min.io/v1alpha1
+kind: PolicyBinding
+metadata:
+  name: {{ include "tenant.policyBindingName" (dict "policyBinding" $roleConfig.policyBinding "roleName" $roleName "root" $) }}
+  namespace: {{ $.Values.tenant.namespace }}
+  labels:
+    {{- include "tenant.policyBindingLabels" $ | nindent 4 }}
+    app.kubernetes.io/role: {{ $roleName }}
+    {{- with $roleConfig.policyBinding.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with $roleConfig.policyBinding.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  application:
+    serviceaccount: {{ include "tenant.serviceAccountName" (dict "serviceAccount" $roleConfig.serviceAccount "roleName" $roleName "root" $) }}
+    namespace: {{ $.Values.tenant.namespace }}
+  policies:
+    - {{ $roleConfig.name }}
+{{- end }}
+{{- end }}
+{{- else }}
+{{- if .Values.sts.policyBindingEnabled }}
+# WARNING: STS API (sts.min.io/v1alpha1) is not available in this cluster
+# PolicyBinding resources cannot be created without STS enabled in MinIO Operator
+# Please ensure OPERATOR_STS_ENABLED=on in your MinIO Operator deployment
+{{- end }}
+{{- end }}
+{{- end }}
