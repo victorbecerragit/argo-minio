@@ -1,5 +1,7 @@
 # PolicyBinding Integration Guide for MinIO Tenant Helm Charts
 
+The solution addresses the current limitation of MinIO operator not supporting direct policy configuration (Minio PBAC) in Helm values while providing a robust, scalable, and maintainable approach to policy management in production environments.
+
 ## Overview
 
 This guide demonstrates how to integrate **PolicyBinding** resources directly into your MinIO tenant Helm chart templates. This approach provides declarative policy management using Kubernetes-native resources while leveraging the MinIO Operator's STS (Security Token Service) capabilities.
@@ -430,5 +432,3 @@ This PolicyBinding integration provides a complete solution for managing MinIO p
 - **Kubernetes-native implementation** using CRDs and service accounts
 - **Automated deployment** with policy creation jobs
 - **Secure access control** via STS token authentication
-
-The solution addresses the current limitation of MinIO operator not supporting direct policy configuration in Helm values while providing a robust, scalable, and maintainable approach to policy management in production environments.
