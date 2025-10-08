@@ -25,15 +25,15 @@ A Helm chart for Kubernetes
 | eso.wilcard_cert.vault_path | string | `"wildcard_cert"` |  |
 | tenant.ingress.api.annotations."nginx.ingress.kubernetes.io/backend-protocol" | string | `"HTTPS"` |  |
 | tenant.ingress.api.enabled | bool | `true` |  |
-| tenant.ingress.api.host | string | `"minio-sample.iride.earth"` |  |
+| tenant.ingress.api.host | string | `"minio-sample.acme.com"` |  |
 | tenant.ingress.api.ingressClassName | string | `"nginx"` |  |
-| tenant.ingress.api.tls[0].hosts[0] | string | `"minio-sample.iride.earth"` |  |
+| tenant.ingress.api.tls[0].hosts[0] | string | `"minio-sample.acme.com"` |  |
 | tenant.ingress.api.tls[0].secretName | string | `"minio-sample-wildcard-tls"` |  |
 | tenant.ingress.console.annotations."nginx.ingress.kubernetes.io/backend-protocol" | string | `"HTTPS"` |  |
 | tenant.ingress.console.enabled | bool | `true` |  |
-| tenant.ingress.console.host | string | `"minio-console-sample.iride.earth"` |  |
+| tenant.ingress.console.host | string | `"minio-console-sample.acme.com"` |  |
 | tenant.ingress.console.ingressClassName | string | `"nginx"` |  |
-| tenant.ingress.console.tls[0].hosts[0] | string | `"minio-console-sample.iride.earth"` |  |
+| tenant.ingress.console.tls[0].hosts[0] | string | `"minio-console-sample.acme.com"` |  |
 | tenant.ingress.console.tls[0].secretName | string | `"minio-sample-wildcard-tls"` |  |
 | tenant.tenant.certificate.externalCertSecret[0].name | string | `"minio-sample-wildcard-tls"` |  |
 | tenant.tenant.certificate.externalCertSecret[0].type | string | `"kubernetes.io/tls"` |  |
@@ -42,11 +42,11 @@ A Helm chart for Kubernetes
 | tenant.tenant.configSecret.name | string | `"minio-sample-config-external-secret"` |  |
 | tenant.tenant.configuration.name | string | `"minio-sample-config-external-secret"` |  |
 | tenant.tenant.env[0].name | string | `"MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM"` |  |
-| tenant.tenant.env[0].value | string | `"https://auth-infra.iride.earth/realms/intranet/.well-known/openid-configuration"` |  |
+| tenant.tenant.env[0].value | string | `"https://auth-infra.acme.com/realms/intranet/.well-known/openid-configuration"` |  |
 | tenant.tenant.env[1].name | string | `"MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM"` |  |
 | tenant.tenant.env[1].value | string | `"sample"` |  |
 | tenant.tenant.env[2].name | string | `"MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM"` |  |
-| tenant.tenant.env[2].value | string | `"IRIDE SSO"` |  |
+| tenant.tenant.env[2].value | string | `"acme SSO"` |  |
 | tenant.tenant.env[3].name | string | `"MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM"` |  |
 | tenant.tenant.env[3].value | string | `"openid,email"` |  |
 | tenant.tenant.env[4].name | string | `"MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM"` |  |

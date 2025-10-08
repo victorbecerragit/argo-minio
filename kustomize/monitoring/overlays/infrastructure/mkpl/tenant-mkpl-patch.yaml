@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio-tenant-mkpl-sm
+spec:
+  selector:
+    matchLabels:
+      v1.min.io/tenant: tenant-mkpl
+  namespaceSelector:
+    matchNames:
+      - minio-tenant-mkpl

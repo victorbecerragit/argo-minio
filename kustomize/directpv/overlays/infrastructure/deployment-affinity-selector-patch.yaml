@@ -3,8 +3,14 @@ kind: Deployment
 metadata:
   name: controller 
 spec:
+  replicas: 2
   template:
     spec:
+      # TODO- enabled tolerations on controller to avoid surprises.
+      #tolerations:
+      #  - key: minio-directpv
+      #    value: storage
+      #    effect: NoSchedul
       nodeSelector:
         directpv-controller: "yes"
       affinity:

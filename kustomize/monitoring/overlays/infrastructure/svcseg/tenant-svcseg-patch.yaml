@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio-tenant-svcseg-sm
+spec:
+  selector:
+    matchLabels:
+      v1.min.io/tenant: tenant-svcseg
+  namespaceSelector:
+    matchNames:
+      - minio-tenant-svcseg

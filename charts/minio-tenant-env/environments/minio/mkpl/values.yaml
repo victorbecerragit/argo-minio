@@ -1,0 +1,199 @@
+---
+eso:
+  secret_store:
+    name: minio-vault
+    kind: ClusterSecretStore
+  wilcard_cert:
+    vault_path: wildcard_cert
+    crt_property: tls.crt
+    key_property: tls.key
+  minio:
+    config_secret_path: minio-sample-config
+    user_secret_property: user
+    password_secret_property: password
+    client_secret_property: openid-client-secret
+
+ingress-nginx:
+  controller:
+    ingressClassResource:
+      name: minio-tenant-mkpl-nginx
+      controllerValue: k8s.io/minio-tenant-mkpl-ingress-nginx
+    ingressClass: minio-tenant-mkpl-nginx
+    scope:
+      enabled: false
+      
+tenant:
+  tenant:  
+    name: tenant-mkpl
+    namespace: minio-tenant-mkpl
+    image:
+      repository: quay.io/minio/minio
+      tag: RELEASE.2025-04-08T15-41-24Z
+      #tag: RELEASE.2025-08-28T18-30-00Z - ImagePullBackOff image not found
+      #tag: RELEASE.2025-07-18T21-56-31Z
+      pullPolicy: IfNotPresent
+    serviceMetadata:
+      minioServiceLabels:
+        v1.min.io/tenant: tenant-mkpl
+    env:
+      - name: MINIO_PROMETHEUS_AUTH_TYPE
+        value: "public"
+      - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
+        value: "https://auth-infra.acme.com/realms/intranet/.well-known/openid-configuration"
+      - name: MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM
+        value: "minio-tenant-sample"
+      - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
+        value: "acme SSO"
+      - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
+        value: "openid,email"
+      - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
+        value: "on"
+      - name: GOMEMLIMIT
+        value: 64GiB
+      - name: MINIO_CONFIG_ENV_FILE
+        value: /tmp/minio/config.env    
+      - name: CONSOLE_STS_DURATION
+        value: "12h"
+      - name: MINIO_STS_DURATION
+        value: "12h"
+      - name: MINIO_BROWSER_SESSION_DURATION
+        value: "12h"      
+    configuration:
+      name: minio-config-secret
+    configSecret:
+      name: minio-config-secret
+      existingSecret: true
+    certificate:
+      requestAutoCert: true
+    pools:
+      - name: pool-390
+        servers: 4                   # Multi-node: 4 pods
+        volumesPerServer: 2          # Multi-drive: 2 drives per pod/node
+        size: 390Gi                   # Size per volumes = 2 * 390Gi = 780Gi * 4 nodes = 3.120Gi (3TB)
+        storageClassName: directpv-min-io   # storageClassName: directpv-min-io
+        tolerations:
+          - key: minio-directpv
+            value: storage
+            effect: NoSchedule
+        nodeSelector:
+          directpv-node: "yes"
+        affinity: {}
+        resources:
+          requests:
+            cpu: 8
+            memory: 16
+          #limits:       # Limits is not enabled on minio-tenant, memory-limits should be added as parameters
+          #  cpu: 8      # https://github.com/minio/operator/issues/2388
+          #  memory: 16
+
+#      - name: pool-100-1
+#        servers: 2                   # Multi-node: 2 pods
+#        volumesPerServer: 3          # Multi-drive: 4 drives per pod/node
+#        size: 97Gi                   # Size per volumes = 3 * 97Gi = 291Gi * 4 nodes = 1164Gi (1TB)
+#        storageClassName: directpv-min-io   # storageClassName: directpv-min-io
+#        tolerations:
+#          - key: minio-directpv
+#            value: storage
+#            effect: NoSchedule
+#        nodeSelector:
+#          directpv: "yes"
+#        affinity: { }
+#        resources:
+#          requests:
+#            cpu: 4
+#            memory: 8
+#          #limits:
+#          #  cpu: 2
+#          #  memory: 2
+#
+#      - name: pool-100-2
+#        servers: 2                   # Multi-node: 2 pods
+#        volumesPerServer: 3          # Multi-drive: 4 drives per pod/node
+#        size: 97Gi                   # Size per volumes = 3 * 97Gi = 291Gi * 4 nodes = 1164Gi (1TB)
+#        storageClassName: directpv-min-io   # storageClassName: directpv-min-io
+#        tolerations:
+#          - key: minio-directpv
+#            value: storage
+#            effect: NoSchedule
+#        nodeSelector:
+#          directpv: "yes"
+#        affinity: { }
+#        resources:
+#          requests:
+#            cpu: 4
+#            memory: 8
+#          #limits:
+#          #  cpu: 2
+#          #  memory: 2
+
+    serviceAccountName: ""
+    metrics:
+      enabled: true
+      port: 9000
+      protocol: http
+    features:
+      bucketDNS: false
+      enableSFTP: false
+    buckets:
+      - name: benchmark-bucket
+        region: us-east-1
+        objectLock: false
+      - name: tenant-warp-bucket-1
+        region: us-east-1
+        objectLock: false
+      - name: tenant-warp-bucket-2
+        region: us-east-2
+        objectLock: true
+    prometheusOperator: false
+    #prometheusOperatorScrapeMetricsPaths: /minio/v2/metrics/cluster
+    annotations: 
+      prometheus.io/scrape: 'true'
+      prometheus.io/scheme: http
+      prometheus.io/port: '9000'
+
+  ingress:
+    api:
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      enabled: true
+      host: minio-sample.acme.com
+      ingressClassName: "nginx"
+      tls:
+        - hosts:
+            - minio-sample.acme.com
+    console:
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      enabled: true
+      host: minio-console-sample.acme.com
+      ingressClassName: "nginx"
+      tls:
+        - hosts:
+            - minio-console-sample.acme.com
+      
+#  ingress:
+#    api:
+#      enabled: true
+#      ingressClassName: minio-tenant-mkpl-nginx
+#      annotations:
+#        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+#        nginx.ingress.kubernetes.io/proxy-body-size: "1g"
+#      tls:
+#        - hosts:
+#            - minio-sample.acme.com
+#          secretName: wildcard-tls
+#      host: minio-sample.acme.com
+#    console:
+#      enabled: true
+#      ingressClassName: minio-tenant-mkpl-nginx
+#      annotations:
+#        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+#      tls:
+#        - hosts:
+#            - minio-console-sample.acme.com
+#          secretName: wildcard-tls
+#      host: minio-console-sample.acme.com
+
+# Enable PolicyBinding features and define policies and roles for STS
+  # Path to the MinIO Tenant where to apply the policies
+  # Enable PolicyBinding features and define policies and roles for STS

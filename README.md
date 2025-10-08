@@ -47,7 +47,7 @@ Directpv and minio will respect this toleration.
 | [argocd/minio/tenant-two](argocd/minio/tenant-two) | argocd app to handle minio-operator will look at helm/values-tenant-two.yaml behing path /helm. |
 | [argocd/project](argocd/project) | Argo project - Project specifically created to handle minio applications, it allow to key minio in a controller space behind ArgoCD. |
 
-```yaml
+
 # Minio operator and tenants custom helm chart definitions with ESO (external secrets operator) copied on /charts 
 
 # Experimental Optional to deploy minio using Helm Chart directly .
@@ -65,11 +65,9 @@ helm-chart
     tenant-two.yaml
 
 
+```yaml
 
-
-
-
-# This repo is a test performed to install directpv using "kustomize"
+# This part of the repo is a poc to install directpv using "kustomize" based on minio/directpv resources repository.
 # Source repo : https://github.com/minio/directpv/tree/master/resources
 
 # It was modified with node labels and tolerations to be distribuited accross nodes during the installations.

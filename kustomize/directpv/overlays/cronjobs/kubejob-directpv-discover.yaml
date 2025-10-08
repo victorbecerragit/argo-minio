@@ -19,13 +19,13 @@ spec:
           nodeSelector:
             directpv-controller: "yes"
           containers:
-            - name: directpv
-              image: victorbecerra/directpv-discover:v4.1.5
+            - name: directpv-discovery
+              image: directpv-discovery:dev
               imagePullPolicy: Always
               command: ["/bin/sh", "-c", "/usr/local/bin/directpv-discovery.sh"]
               env:
                 - name: DANGEROUS_MODE
-                  value: "false"  # Set to "true" to enable dangerous mode and initialize drives and restore the value to "false" after use it to avoid issues.
+                  value: "true"  # Set to "true" to enable dangerous mode and initialize drives and restore the value to "false" after use it to avoid issues.
                 - name: WAIT_TIME
                   value: "10m"  # Wait time for discovery command
               resources:
@@ -41,3 +41,5 @@ spec:
           enableServiceLinks: true
           serviceAccountName: directpv-min-io
           terminationGracePeriodSeconds: 30
+          imagePullSecrets:
+            - name: gitlab-registry

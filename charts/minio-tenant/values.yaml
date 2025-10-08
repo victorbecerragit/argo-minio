@@ -38,11 +38,11 @@ tenant:
       existingSecret: true
     env:
       - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
-        value: "https://auth-infra.iride.earth/realms/intranet/.well-known/openid-configuration"
+        value: "https://auth-infra.acme.com/realms/intranet/.well-known/openid-configuration"
       - name: MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM
         value: "sample"
       - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
-        value: "IRIDE SSO"
+        value: "acme SSO"
       - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
         value: "openid,email"
       - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
@@ -55,9 +55,9 @@ tenant:
         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
       tls:
         - hosts:
-            - minio-sample.iride.earth
+            - minio-sample.acme.com
           secretName: minio-sample-wildcard-tls
-      host: minio-sample.iride.earth
+      host: minio-sample.acme.com
     console:
       enabled: true
       ingressClassName: nginx
@@ -65,7 +65,7 @@ tenant:
         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
       tls:
         - hosts:
-            - minio-console-sample.iride.earth
+            - minio-console-sample.acme.com
           secretName: minio-sample-wildcard-tls
-      host: minio-console-sample.iride.earth
+      host: minio-console-sample.acme.com
          

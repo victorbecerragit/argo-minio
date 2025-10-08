@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio-tenant-tlbx-sm
+spec:
+  selector:
+    matchLabels:
+      v1.min.io/tenant: tenant-tlbx
+  namespaceSelector:
+    matchNames:
+      - minio-tenant-tlbx

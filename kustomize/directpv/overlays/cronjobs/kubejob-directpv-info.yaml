@@ -16,10 +16,11 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: directpv-discover
-            
-            image: victorbecerra/kubectl-directpv:v4.1.5
+            image: directpv-discovery:dev
+            imagePullPolicy: Always
             command:
               - /bin/sh
               - -c
               - kubectl directpv info && kubectl directpv list drives && kubectl directpv list volumes
-
+          imagePullSecrets:
+            - name: gitlab-registry

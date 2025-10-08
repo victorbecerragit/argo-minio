@@ -1,0 +1,117 @@
+---
+eso:
+  secret_store:
+    name: infrastructure-vault
+    kind: ClusterSecretStore
+  wilcard_cert:
+    vault_path: wildcard_cert
+    crt_property: tls.crt
+    key_property: tls.key
+  minio:
+    config_secret_path: minio/svcseg/config
+    user_secret_property: user
+    password_secret_property: password
+    client_secret_property: openid-client-secret
+
+ingress-nginx:
+  controller:
+    ingressClassResource:
+      name: minio-tenant-svcseg-nginx
+      controllerValue: k8s.io/minio-tenant-svcseg-ingress-nginx
+    ingressClass: minio-tenant-svcseg-nginx
+    scope:
+      enabled: true
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 4
+      
+tenant:
+  tenant:
+    name: tenant-svcseg
+    image:
+      repository: quay.io/minio/minio
+      tag: RELEASE.2025-04-08T15-41-24Z
+      pullPolicy: IfNotPresent
+    env:
+      - name: MINIO_PROMETHEUS_AUTH_TYPE
+        value: "public"
+      - name: MINIO_IDENTITY_OPENID_CONFIG_URL_PRIMARY_IAM
+        value: "https://auth-infra.acme.com/realms/intranet/.well-known/openid-configuration"
+      - name: MINIO_IDENTITY_OPENID_CLIENT_ID_PRIMARY_IAM
+        value: "minio-k8s"
+      - name: MINIO_IDENTITY_OPENID_DISPLAY_NAME_PRIMARY_IAM
+        value: "acme SSO"
+      - name: MINIO_IDENTITY_OPENID_SCOPES_PRIMARY_IAM
+        value: "openid,email"
+      - name: MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC_PRIMARY_IAM
+        value: "on"
+      - name: GOMEMLIMIT
+        value: 64GiB
+      - name: MINIO_CONFIG_ENV_FILE
+        value: /tmp/minio/config.env    
+    configuration:
+      name: minio-config-secret
+    configSecret:
+      name: minio-config-secret
+      existingSecret: true
+    certificate:
+      requestAutoCert: true
+    pools:
+      - name: pool-25t
+        servers: 4                   # Multi-node: 4 pods
+        volumesPerServer: 6          # Multi-drive: 6 drives per pod/node
+        size: 975Gi                   # Size per volumes = 6 * 975Gi = 5,850Gi * 4 nodes = 23.400Gi (24TB)
+        storageClassName: directpv-min-io   # storageClassName: directpv-min-io
+        tolerations:
+          - key: minio-directpv
+            value: storage
+            effect: NoSchedule
+        nodeSelector:
+          directpv-node: "yes"
+        affinity: {}
+        resources:
+          requests:
+            cpu: 8
+            memory: 16
+          #limits:       # Limits is not enabled on minio-tenant, memory-limits should be added as parameters
+          #  cpu: 8      # https://github.com/minio/operator/issues/2388
+          #  memory: 16
+    metrics:
+      enabled: true
+      port: 9000
+      protocol: http
+    features:
+      bucketDNS: false
+      enableSFTP: false
+    prometheusOperator: false
+
+  ingress:
+    api:
+      enabled: true
+      ingressClassName: minio-tenant-svcseg-nginx
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        nginx.ingress.kubernetes.io/proxy-body-size: "2g"
+        # nginx.ingress.kubernetes.io/client-body-buffer-size: "16m" # Discover from tests , 50568692 a client request body is buffered to a temporary file
+        # nginx.ingress.kubernetes.io/proxy-buffer-size: 32k # Set  buffer size to 24KB instead of the default 4K or 8K.
+        # nginx.ingress.kubernetes.io/proxy-buffering: "off" # Set Real-time or near-real-time data streaming scenarios,not buffering
+        # nginx.ingress.kubernetes.io/proxy-buffers: 16 32k # 16 is the number of buffers allocated, 24k is the size of each buffer (24 kilobytes).
+        # nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        # nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+        # nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+      tls:
+        - hosts:
+            - s3-servicesegment.acme.com
+          secretName: wildcard-tls
+      host: s3-servicesegment.acme.com
+    console:
+      enabled: true
+      ingressClassName: minio-tenant-svcseg-nginx
+      annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      tls:
+        - hosts:
+            - s3-servicesegment-console.acme.com
+          secretName: wildcard-tls
+      host: s3-servicesegment-console.acme.com

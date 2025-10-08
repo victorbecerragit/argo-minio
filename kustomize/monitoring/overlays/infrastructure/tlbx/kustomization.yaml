@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base
+
+patches:
+  - path: tenant-tlbx-patch.yaml
+    target:
+      kind: ServiceMonitor
+      name: minio-tenant-tlbx-sm
+  # Or another patch for a different namespace
+

@@ -1,0 +1,44 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio-tenant-mkpl-sm
+  namespace: cattle-monitoring-system
+  labels:
+    release: rancher-monitoring    
+spec:
+  endpoints:
+    #job_name: minio-cluster 
+    - port: https-minio       # The port name as defined in the MinIO Service manifest
+      path: /minio/v2/metrics/cluster
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+        serverName: ""
+    #job_name: minio-node
+    - port: https-minio       # The port name as defined in the MinIO Service manifest
+      path: /minio/v2/metrics/node
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+        serverName: ""
+    #job_name: minio-bucket
+    - port: https-minio       # The port name as defined in the MinIO Service manifest
+      path: /minio/v2/metrics/bucket
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+        serverName: ""
+    #job_name: minio-v3
+    - port: https-minio       # The port name as defined in the MinIO Service manifest
+      path: /minio/metrics/v3
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+        serverName: ""    
+  selector:
+    matchLabels:
+      v1.min.io/tenant: tenant-mkpl       # The label matching your MinIO Service
+  namespaceSelector:
+    matchNames:
+      - minio-tenant-mkpl
+
