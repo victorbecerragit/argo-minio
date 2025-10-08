@@ -47,22 +47,7 @@ Directpv and minio will respect this toleration.
 | [argocd/minio/tenant-two](argocd/minio/tenant-two) | argocd app to handle minio-operator will look at helm/values-tenant-two.yaml behing path /helm. |
 | [argocd/project](argocd/project) | Argo project - Project specifically created to handle minio applications, it allow to key minio in a controller space behind ArgoCD. |
 
-
 # Minio operator and tenants custom helm chart definitions with ESO (external secrets operator) copied on /charts 
-
-# Experimental Optional to deploy minio using Helm Chart directly .
-# The cons of this approach is that every time that there is a modification like add a tenants, modifi secrets and so on.
-# Argo will refresh/sync the Helm application if there are syntax errors on helm templating or so, will brake the installation.
-# Also helm-chart definitions using helm templates, it could be complex to handle having many tenants.
-
-helm-chart
-  Chart.yaml
-  templates
-    minio-operator.yaml
-    tenant.yaml
-  values
-    tenant-one.yaml  
-    tenant-two.yaml
 
 
 ```yaml
