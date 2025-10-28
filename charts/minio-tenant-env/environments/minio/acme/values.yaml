@@ -16,16 +16,16 @@ eso:
 ingress-nginx:
   controller:
     ingressClassResource:
-      name: minio-tenant-mkpl-nginx
-      controllerValue: k8s.io/minio-tenant-mkpl-ingress-nginx
-    ingressClass: minio-tenant-mkpl-nginx
+      name: minio-tenant-acme-nginx
+      controllerValue: k8s.io/minio-tenant-acme-ingress-nginx
+    ingressClass: minio-tenant-acme-nginx
     scope:
       enabled: false
       
 tenant:
   tenant:  
-    name: tenant-mkpl
-    namespace: minio-tenant-mkpl
+    name: tenant-acme
+    namespace: minio-tenant-acme
     image:
       repository: quay.io/minio/minio
       tag: RELEASE.2025-04-08T15-41-24Z
@@ -34,7 +34,7 @@ tenant:
       pullPolicy: IfNotPresent
     serviceMetadata:
       minioServiceLabels:
-        v1.min.io/tenant: tenant-mkpl
+        v1.min.io/tenant: tenant-acme
     env:
       - name: MINIO_PROMETHEUS_AUTH_TYPE
         value: "public"
@@ -174,7 +174,7 @@ tenant:
 #  ingress:
 #    api:
 #      enabled: true
-#      ingressClassName: minio-tenant-mkpl-nginx
+#      ingressClassName: minio-tenant-acme-nginx
 #      annotations:
 #        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 #        nginx.ingress.kubernetes.io/proxy-body-size: "1g"
@@ -185,7 +185,7 @@ tenant:
 #      host: minio-sample.acme.com
 #    console:
 #      enabled: true
-#      ingressClassName: minio-tenant-mkpl-nginx
+#      ingressClassName: minio-tenant-acme-nginx
 #      annotations:
 #        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 #      tls:

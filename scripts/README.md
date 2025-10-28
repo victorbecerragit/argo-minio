@@ -4,20 +4,20 @@
 
 ```bash
 mc admin cluster bucket export acme-legacy
-mc admin cluster bucket import acme-mkpl ./acme-legacy-bucket-metadata.zip
+mc admin cluster bucket import acme-acme ./acme-legacy-bucket-metadata.zip
 ```
 
 ### Migrate iam
 
 ```bash
 mc admin cluster iam export acme-legacy
-mc admin cluster iam import acme-mkpl ./acme-legacy-iam-info.zip
+mc admin cluster iam import acme-acme ./acme-legacy-iam-info.zip
 ```
 
 ### Copy bucket data sample
 
 ```bash
-mc mirror --dry-run acme-legacy/acme-dev-cwl-test acme-mkpl/acme-dev-cwl-test
+mc mirror --dry-run acme-legacy/acme-dev-cwl-test acme-acme/acme-dev-cwl-test
 ```
 
 ### Update buckets list

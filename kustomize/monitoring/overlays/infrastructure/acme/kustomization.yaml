@@ -5,9 +5,9 @@ resources:
   - ../../../base
 
 patches:
-  - path: tenant-mkpl-patch.yaml
+  - path: tenant-acme-patch.yaml
     target:
       kind: ServiceMonitor
-      name: minio-tenant-mkpl-sm
+      name: minio-tenant-acme-sm
   # Or another patch for a different namespace
 

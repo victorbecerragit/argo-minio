@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # S3 Migration Script
-# This script configures MinIO client aliases and migrates data from acme-legacy to acme-mkpl
+# This script configures MinIO client aliases and migrates data from acme-legacy to acme-acme
 # by mirroring each bucket listed in buckets_list.txt
 
 set -e
 
 # Configuration
 SOURCE_ALIAS="acme-legacy"
-TARGET_ALIAS="acme-mkpl"
+TARGET_ALIAS="acme-acme"
 BUCKET_LIST_FILE="buckets_list.txt"
 
 # MinIO endpoints and credentials
@@ -16,9 +16,9 @@ LEGACY_ENDPOINT="https://s3.acme.com"
 LEGACY_ACCESS_KEY="XXXXXXXXXXXXX"
 LEGACY_SECRET_KEY="XXXXXXXXXXXXX"
 
-MKPL_ENDPOINT="https://s3-mkpl.acme.com"
-MKPL_ACCESS_KEY="XXXXXXXXXXXXX"
-MKPL_SECRET_KEY="XXXXXXXXXXXXX"
+acme_ENDPOINT="https://s3-acme.acme.com"
+acme_ACCESS_KEY="XXXXXXXXXXXXX"
+acme_SECRET_KEY="XXXXXXXXXXXXX"
 
 # Function to configure alias
 configure_alias() {
@@ -58,9 +58,9 @@ setup_minio_client() {
     echo "Configuring source MinIO alias (acme-legacy)..."
     configure_alias "$SOURCE_ALIAS" "$LEGACY_ENDPOINT" "$LEGACY_ACCESS_KEY" "$LEGACY_SECRET_KEY"
 
-    # Configure target alias (acme-mkpl)
-    echo "Configuring target MinIO alias (acme-mkpl)..."
-    configure_alias "$TARGET_ALIAS" "$MKPL_ENDPOINT" "$MKPL_ACCESS_KEY" "$MKPL_SECRET_KEY"
+    # Configure target alias (acme-acme)
+    echo "Configuring target MinIO alias (acme-acme)..."
+    configure_alias "$TARGET_ALIAS" "$acme_ENDPOINT" "$acme_ACCESS_KEY" "$acme_SECRET_KEY"
 
     echo "✓ MinIO client aliases configured successfully!"
 }
@@ -211,7 +211,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
     echo ""
     echo "The script will automatically:"
     echo "  1. Install MinIO client (mc) if not present"
-    echo "  2. Configure acme-legacy and acme-mkpl aliases"
+    echo "  2. Configure acme-legacy and acme-acme aliases"
     echo "  3. Migrate all buckets from source to target"
     exit 0
 fi

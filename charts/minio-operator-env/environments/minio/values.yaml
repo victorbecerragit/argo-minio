@@ -5,7 +5,7 @@ operator:
       - name: OPERATOR_STS_ENABLED
         value: "on"
       - name: WATCHED_NAMESPACE   # This must match exactly with each tenant namespace, otherwise, the tenant will not be deployed by minio operator
-        value: "minio-tenant-mkpl"
+        value: "minio-tenant-acme"
 
     image:
       repository: quay.io/minio/operator

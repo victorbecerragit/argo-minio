@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: minio-tenant-mkpl-sm
+  name: minio-tenant-acme-sm
   namespace: cattle-monitoring-system
   labels:
     release: rancher-monitoring    
@@ -37,8 +37,8 @@ spec:
         serverName: ""    
   selector:
     matchLabels:
-      v1.min.io/tenant: tenant-mkpl       # The label matching your MinIO Service
+      v1.min.io/tenant: tenant-acme       # The label matching your MinIO Service
   namespaceSelector:
     matchNames:
-      - minio-tenant-mkpl
+      - minio-tenant-acme
 

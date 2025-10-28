@@ -5,7 +5,7 @@
 
     - # Minio-Tenant
 
-        Prometheus minio-servicemonitor require this label > "v1.min.io/tenant: tenant-mkpl" defined on minio-tenant service "minio" to autodiscover nodes.
+        Prometheus minio-servicemonitor require this label > "v1.min.io/tenant: tenant-acme" defined on minio-tenant service "minio" to autodiscover nodes.
 
 
 To test test it, the cluster should have RKE/2 solution monitoring installed, it will create a servicemonitor on ns "cattle-monitoring-system" and configmaps on ns "cattle-dashboards"

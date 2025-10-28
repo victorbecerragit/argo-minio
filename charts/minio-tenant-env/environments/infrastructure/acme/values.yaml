@@ -8,7 +8,7 @@ eso:
     crt_property: tls.crt
     key_property: tls.key
   minio:
-    config_secret_path: minio/mkpl/config
+    config_secret_path: minio/acme/config
     user_secret_property: user
     password_secret_property: password
     client_secret_property: openid-client-secret
@@ -16,9 +16,9 @@ eso:
 ingress-nginx:
   controller:
     ingressClassResource:
-      name: minio-tenant-mkpl-nginx
-      controllerValue: k8s.io/minio-tenant-mkpl-ingress-nginx
-    ingressClass: minio-tenant-mkpl-nginx
+      name: minio-tenant-acme-nginx
+      controllerValue: k8s.io/minio-tenant-acme-ingress-nginx
+    ingressClass: minio-tenant-acme-nginx
     scope:
       enabled: true
     autoscaling:
@@ -28,7 +28,7 @@ ingress-nginx:
       
 tenant:
   tenant:
-    name: tenant-mkpl
+    name: tenant-acme
     image:
       repository: quay.io/minio/minio
       tag: RELEASE.2025-04-08T15-41-24Z
@@ -89,7 +89,7 @@ tenant:
   ingress:
     api:
       enabled: true
-      ingressClassName: minio-tenant-mkpl-nginx
+      ingressClassName: minio-tenant-acme-nginx
       annotations:
         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         nginx.ingress.kubernetes.io/proxy-body-size: "5g"
@@ -100,7 +100,7 @@ tenant:
       host: s3.acme.com
     console:
       enabled: true
-      ingressClassName: minio-tenant-mkpl-nginx
+      ingressClassName: minio-tenant-acme-nginx
       annotations:
         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
         nginx.ingress.kubernetes.io/proxy-body-size: "5g"
